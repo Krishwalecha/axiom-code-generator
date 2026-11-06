@@ -112,14 +112,14 @@ export default function App(){
        <span className="sb-tag">INPUT</span>
       </div>
       <label className="lbl">Task description</label>
-      <textarea className="inp textarea" rows={4} value={task} onChange={e=>setTask(e.target.value)} placeholder="Describe what your function should do..."/>
+      <textarea className="inp textarea" rows={4} value={task} onChange={e=>{setTask(e.target.value);if(testMode==="auto")setTests("");}} placeholder="Describe what your function should do..."/>
      </div>
 
      <div className="sb-group">
       <div className="sb-row">
        <div className="sb-col">
         <label className="lbl">Function name</label>
-        <input className="inp mono" value={fn} onChange={e=>setFn(e.target.value)}/>
+        <input className="inp mono" value={fn} onChange={e=>{setFn(e.target.value);if(testMode==="auto")setTests("");}}/>
        </div>
        <div className="sb-col">
         <label className="lbl">Model</label>
@@ -152,9 +152,12 @@ export default function App(){
          <div className="auto-preview mono">{tests}</div>
          <div className="auto-actions">
           <span className="test-count">{testCount} test{testCount!==1?"s":""} generated</span>
-          <button className="btn-regen" onClick={autoGenerateTests} disabled={genningTests}>
-           {genningTests?<><LoaderCircle size={11} className="spin"/>Generating...</>:<><Wand2 size={11}/>Regenerate</>}
-          </button>
+          <div style={{display:"flex",gap:"6px"}}>
+           <button className="btn-regen" onClick={()=>setTests("")}>Reset</button>
+           <button className="btn-regen" onClick={autoGenerateTests} disabled={genningTests}>
+            {genningTests?<><LoaderCircle size={11} className="spin"/>Generating...</>:<><Wand2 size={11}/>Regenerate</>}
+           </button>
+          </div>
          </div>
         </>:<>
          <p className="auto-hint">Tests will be auto-generated from your task description when you click generate, or:</p>

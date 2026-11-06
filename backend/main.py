@@ -28,15 +28,18 @@ def health(): return {"status":"ok"}
 @app.post("/api/generate/tests")
 def generate_tests(req:TestGenRequest):
     prompt=(
-        f"Generate 4-6 test cases for this Python function as a JSON array.\n"
+        f"Generate 5 accurate and diverse test cases for this Python function as a JSON array.\n"
         f"Task: {req.task}\n"
         f"Function name: {req.function_name}\n\n"
-        f"Each test must be an object with \"args\" (array of positional arguments) and \"expected\" (the expected return value).\n"
-        f"Return ONLY the JSON array, no markdown, no explanation.\n"
-        f"Example format: [{{\"args\": [\"hello\"], \"expected\": true}}]"
+        f"CRITICAL REQUIREMENTS:\n"
+        f"1. Strictly use the argument types mentioned in the task (e.g. if task says string, pass strings like 'racecar', 'hello'; if numbers, pass numbers).\n"
+        f"2. Each test must be an object with exact keys 'args' (array of positional arguments) and 'expected' (the expected return value).\n"
+        f"3. Expected return values must strictly be the mathematically/logically correct ground-truth outputs.\n"
+        f"4. Output ONLY the JSON array. Do not include markdown ticks, explanation or commentary.\n"
+        f"Example: [{{\"args\": [\"racecar\"], \"expected\": true}}, {{\"args\": [\"hello\"], \"expected\": false}}]"
     )
     msgs=[
-        {"role":"system","content":"You are a test case generator. Return ONLY valid JSON arrays. No markdown fences, no explanation."},
+        {"role":"system","content":"You are a Python test suite generator. Output ONLY a valid JSON array of test case objects. Never wrap in markdown codeblocks."},
         {"role":"user","content":prompt}
     ]
     raw=complete(msgs,req.model)
