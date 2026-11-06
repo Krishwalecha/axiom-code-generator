@@ -27,10 +27,12 @@ def health(): return {"status":"ok"}
 
 @app.post("/api/generate/tests")
 def generate_tests(req:TestGenRequest):
+    import re
+    clean_fn = re.sub(r"\s+", "_", req.function_name.strip())
     prompt=(
         f"Generate 5 accurate and diverse test cases for this Python function as a JSON array.\n"
         f"Task: {req.task}\n"
-        f"Function name: {req.function_name}\n\n"
+        f"Function name: {clean_fn}\n\n"
         f"CRITICAL REQUIREMENTS:\n"
         f"1. Strictly use the argument types mentioned in the task (e.g. if task says string, pass strings like 'racecar', 'hello'; if numbers, pass numbers).\n"
         f"2. Each test must be an object with exact keys 'args' (array of positional arguments) and 'expected' (the expected return value).\n"
@@ -57,9 +59,11 @@ def generate_tests(req:TestGenRequest):
 
 @app.post("/api/generate/stream")
 def generate(req:Request):
+    import re
+    clean_fn = re.sub(r"\s+", "_", req.function_name.strip())
     def events():
         try:
-            for event in stream_solve(req.task,req.function_name,req.tests,req.model):
+            for event in stream_solve(req.task,clean_fn,req.tests,req.model):
                 yield "data: "+json.dumps(event,ensure_ascii=False)+"\n\n"
         except Exception as e:
             yield "data: "+json.dumps({"type":"error","message":str(e)})+"\n\n"

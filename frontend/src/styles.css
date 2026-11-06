@@ -96,7 +96,8 @@ button{cursor:pointer}
 }
 
 /* ── Labels ── */
-.lbl{font-size:11px;font-weight:500;color:#a1a1aa;margin-bottom:2px}
+.lbl{font-size:11px;font-weight:500;color:#a1a1aa;margin-bottom:2px;display:flex;align-items:center;justify-content:space-between}
+.lbl-tag{font-size:9px;color:#71717a;font-weight:400;text-transform:lowercase;background:#18181b;padding:1px 5px;border-radius:3px}
 
 /* ── Inputs ── */
 .inp{

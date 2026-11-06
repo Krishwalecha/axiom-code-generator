@@ -27,6 +27,8 @@ export default function App(){
 
  const autoGenerateTests=useCallback(async()=>{
   if(!task.trim()||!fn.trim()){setError("Enter task and function name first.");return;}
+  if(/\s/.test(fn.trim())){setError("Function names cannot have spaces. Use snake_case (e.g. "+fn.trim().replace(/\s+/g,"_")+").");return;}
+  if(!/^[a-zA-Z_][a-zA-Z0-9_]*$/.test(fn.trim())){setError("Invalid function name. Use standard Python naming (e.g. is_prime, calculate_sum).");return;}
   setGenningTests(true);setError("");
   try{
    const res=await fetch(`${API}/api/generate/tests`,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({task,function_name:fn,model})});
@@ -58,6 +60,8 @@ export default function App(){
    try{testList=JSON.parse(tests);if(!Array.isArray(testList)||!testList.length)throw Error("Add at least one test case.");}catch(e){setError("Invalid test JSON: "+e.message);return;}
   }
   if(!task.trim()||!fn.trim()){setError("Task and function name are required.");return;}
+  if(/\s/.test(fn.trim())){setError("Function names cannot have spaces. Use snake_case (e.g. "+fn.trim().replace(/\s+/g,"_")+").");return;}
+  if(!/^[a-zA-Z_][a-zA-Z0-9_]*$/.test(fn.trim())){setError("Invalid function name. Use standard Python naming (e.g. is_prime, calculate_sum).");return;}
   setError("");setPassed(null);setAttempts(0);setBandit("");setRankNote("");setCode("");setOutput("Connecting...");setStage("generating");setLabel("Generating");
   try{
    const res=await fetch(`${API}/api/generate/stream`,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({task,function_name:fn,tests:testList,model})});
@@ -118,8 +122,12 @@ export default function App(){
      <div className="sb-group">
       <div className="sb-row">
        <div className="sb-col">
-        <label className="lbl">Function name</label>
-        <input className="inp mono" value={fn} onChange={e=>{setFn(e.target.value);if(testMode==="auto")setTests("");}}/>
+        <label className="lbl">Function name <span className="lbl-tag">no spaces</span></label>
+        <input className="inp mono" value={fn} placeholder="e.g. is_prime" onChange={e=>{
+          const cleaned = e.target.value.replace(/\s+/g, '_');
+          setFn(cleaned);
+          if(testMode==="auto")setTests("");
+        }}/>
        </div>
        <div className="sb-col">
         <label className="lbl">Model</label>
