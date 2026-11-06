@@ -237,8 +237,22 @@ export default function App(){
      </div>
 
      <div className="console">
-      <div className="con-head"><span className="con-label">OUTPUT</span><span className="con-status">{label}</span></div>
-      <pre className="con-body">{output}</pre>
+      <div className="con-head">
+       <span className="con-label">TERMINAL OUTPUT</span>
+       <div className="con-tools">
+        <span className="con-status">{label}</span>
+        {output&&<button className="btn-con-copy" onClick={()=>{navigator.clipboard.writeText(output);}} title="Copy output">Copy</button>}
+       </div>
+      </div>
+      <div className="con-body">
+       {output.split("\n").map((line, idx) => {
+         let lineClass = "";
+         if (/^(PASS|✓|All \d+)/i.test(line)) lineClass = "line-pass";
+         else if (/^(Test \d+|Error|Traceback|ValueError|TypeError|Exception|TIMEOUT|Execution failed)/i.test(line) || (line.includes("expected") && line.includes("got"))) lineClass = "line-fail";
+         else if (/^(Connecting|Streaming|Candidate|Generating|Executing|Re-running|Repairing)/i.test(line)) lineClass = "line-info";
+         return <div key={idx} className={`con-line ${lineClass}`}>{line || "\u00A0"}</div>;
+       })}
+      </div>
      </div>
 
      {(rankNote||bandit)&&<div className="audit">

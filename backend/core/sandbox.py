@@ -28,20 +28,22 @@ for i, t in enumerate(tests, 1):
         expected = t['expected']
         if got != expected:
             errors.append(f"Test {i}: expected {expected!r}, got {got!r}")
-    except Exception:
-        errors.append(f"Test {i}: " + traceback.format_exc(limit=2))
+    except Exception as e:
+        exc_type = type(e).__name__
+        exc_msg = str(e).strip()
+        errors.append(f"Test {i} Raised {exc_type}: {exc_msg or 'Execution error'}")
 
 if errors:
     print("\n".join(errors))
     sys.exit(1)
 
-print(f"PASS: {len(tests)} tests")
+print(f"PASS: All {len(tests)} tests passed successfully!")
 """
 
 def run(code: str, fn: str, tests: list, timeout: int = 8):
     """
     Executes generated code against tests in an isolated Python subprocess.
-    Does not require Docker, safe for free cloud hosting (Render, Railway, etc.).
+    Uses UTF-8 encoding and clean exception reporting.
     """
     with tempfile.TemporaryDirectory() as d:
         p = Path(d)
@@ -56,8 +58,11 @@ def run(code: str, fn: str, tests: list, timeout: int = 8):
         # Strip environment variables so generated code cannot read sensitive keys like GROQ_API_KEY
         safe_env = {
             "PYTHONIOENCODING": "utf-8",
+            "PYTHONUTF8": "1",
             "PATH": os.environ.get("PATH", ""),
-            "SYSTEMROOT": os.environ.get("SYSTEMROOT", "")  # Needed on Windows
+            "SYSTEMROOT": os.environ.get("SYSTEMROOT", ""),
+            "TEMP": os.environ.get("TEMP", ""),
+            "TMP": os.environ.get("TMP", ""),
         }
 
         # Use python -I (isolated mode): ignores PYTHONPATH, user site-packages, and env variables
@@ -84,6 +89,6 @@ def run(code: str, fn: str, tests: list, timeout: int = 8):
             output = (r.stdout + r.stderr).strip()
             return r.returncode == 0, output
         except subprocess.TimeoutExpired:
-            return False, "TIMEOUT: Execution exceeded 8 second limit (possible infinite loop)."
+            return False, "TIMEOUT: Execution exceeded 8 second limit (possible infinite loop or slow network request)."
         except Exception as e:
             return False, f"Execution failed: {str(e)}"

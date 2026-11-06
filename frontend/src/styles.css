@@ -269,7 +269,7 @@ button{cursor:pointer}
    RESULTS CARD
    ═══════════════════════════════════════ */
 .results-card{
-  min-height:230px;max-height:280px;
+  min-height:260px;max-height:340px;
   display:flex;flex-direction:column;gap:10px;
   padding:14px 18px 12px;
   overflow-y:auto;
@@ -312,22 +312,31 @@ button{cursor:pointer}
 
 /* ── Console ── */
 .console{
-  background:#111113;border:1px solid #1e1e22;border-radius:8px;
-  overflow:hidden;
+  background:#09090b;border:1px solid #27272a;border-radius:8px;
+  overflow:hidden;display:flex;flex-direction:column;
 }
 .con-head{
-  height:30px;display:flex;align-items:center;justify-content:space-between;
-  padding:0 12px;border-bottom:1px solid #1e1e22;
+  height:32px;min-height:32px;display:flex;align-items:center;justify-content:space-between;
+  padding:0 12px;background:#111113;border-bottom:1px solid #1e1e22;
 }
-.con-label{font-size:9px;font-weight:700;letter-spacing:.8px;color:#52525b}
-.con-status{font-size:10px;color:#71717a;font-weight:500}
+.con-label{font-size:9px;font-weight:700;letter-spacing:.8px;color:#71717a}
+.con-tools{display:flex;align-items:center;gap:10px}
+.con-status{font-size:10px;color:#a1a1aa;font-weight:500}
+.btn-con-copy{
+  font-size:9px;color:#a1a1aa;background:#18181b;border:1px solid #27272a;
+  padding:2px 8px;border-radius:4px;cursor:pointer;transition:all .15s;
+}
+.btn-con-copy:hover{color:#fafafa;background:#27272a}
 .con-body{
-  margin:0;padding:10px 12px;
-  min-height:32px;max-height:70px;overflow:auto;
-  white-space:pre-wrap;word-break:break-word;
-  font:11px/1.65 'JetBrains Mono',monospace;
-  color:#a1a1aa;
+  margin:0;padding:12px 14px;
+  min-height:95px;max-height:180px;overflow-y:auto;
+  font:11.5px/1.7 'JetBrains Mono',monospace;
+  background:#09090b;
 }
+.con-line{word-break:break-word;white-space:pre-wrap;color:#a1a1aa}
+.con-line.line-pass{color:#4ade80;font-weight:500}
+.con-line.line-fail{color:#f87171;background:#2d151544;padding:1px 4px;border-radius:3px}
+.con-line.line-info{color:#60a5fa}
 
 /* ── Audit ── */
 .audit{display:flex;gap:8px}
