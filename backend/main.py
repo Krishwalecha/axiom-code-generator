@@ -57,18 +57,17 @@ def generate_tests(req:TestGenRequest):
         {"role":"system","content":"You are a Python test suite generator. Output ONLY a valid JSON array of test case objects. Never wrap in markdown codeblocks."},
         {"role":"user","content":prompt}
     ]
-    raw=complete(msgs,req.model)
-    # Strip markdown fences if present
-    import re
-    raw=re.sub(r"^```(?:json)?\s*","",raw.strip())
-    raw=re.sub(r"\s*```$","",raw).strip()
     try:
+        raw=complete(msgs,req.model)
+        # Strip markdown fences if present
+        raw=re.sub(r"^```(?:json)?\s*","",raw.strip())
+        raw=re.sub(r"\s*```$","",raw).strip()
         tests=json.loads(raw)
         if not isinstance(tests,list):
             raise ValueError("Not a list")
         return {"tests":tests}
-    except Exception:
-        return {"tests":[],"error":"Failed to parse generated tests","raw":raw}
+    except Exception as e:
+        return {"tests":[],"error":str(e)}
 
 @app.post("/api/generate/stream")
 def generate(req:Request):
