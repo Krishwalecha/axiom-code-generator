@@ -2,7 +2,7 @@ import {useState,useCallback} from "react";
 import Editor from "@monaco-editor/react";
 import {Code2,Sparkles,Play,Copy,FlaskConical,Terminal,ShieldCheck,LoaderCircle,CheckCircle2,XCircle,Cpu,ChevronDown,Wand2,PenLine} from "lucide-react";
 
-const API=import.meta.env.VITE_API_URL||"http://localhost:8000";
+const API=import.meta.env.VITE_API_URL||"https://genaiproj-production.up.railway.app";
 
 export default function App(){
  const [task,setTask]=useState("Write a function is_prime(n) that returns True if n is a prime number and False otherwise. Numbers less than 2 are not prime.");
