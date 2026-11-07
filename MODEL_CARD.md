@@ -3,7 +3,7 @@
 ## Model Details
 - **Project Name:** P23 · Code Generator with Test Runner
 - **Track:** Track B — GANs and Transformer Internals
-- **Core Generative Model:** OpenAI GPT-OSS 120B / Meta Llama 3.3 70B (served via Groq LPU API)
+- **Core Generative Model:** OpenAI GPT-OSS 120B (served via Groq LPU API)
 - **Ranking / Discriminator Model:** Microsoft CodeBERT (`microsoft/codebert-base`) semantic cosine ranker
 - **Security & Safety Guardrail:** Bandit AST static analysis scanner (CWE / OWASP rules)
 - **Execution Sandbox:** Python 3.11 isolated subprocess runtime (`-I` mode) with environment stripping and 8-second execution watchdog
