@@ -1,110 +1,100 @@
-# Axiom · P23 Code Generator with Test Runner
+# Axiom - Autonomous Code Generator & Test Runner
 
-> **Generative AI Mini-Project (Track B: GANs & Transformer Internals)**  
-> **Problem Statement P23:** Generate Python from a task description, test it, and repair it once on failure.
+Axiom generates Python code from a plain-English task description, runs it against your test cases in a separate Python process, and repairs it once if the tests fail.
 
-[![Live App](https://img.shields.io/badge/Live_App-Vercel-black?logo=vercel)](https://axiom-code-generator.vercel.app/)
-[![Backend](https://img.shields.io/badge/API_Server-Railway-purple?logo=railway)](https://genaiproj-production.up.railway.app/api/health)
-[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
+Generative AI Mini-Project (Track B) - Problem Statement P23 - Krish Walecha (Roll No. 23)
 
----
+**Live app:** https://axiom-code-generator.vercel.app
+**Backend API:** https://genaiproj-production.up.railway.app (`GET /api/health`)
 
-## 🌟 Live Demo & Deployment
-- **Live Frontend Application:** [https://axiom-code-generator.vercel.app/](https://axiom-code-generator.vercel.app/)
-- **Live Backend API (Railway):** [https://genaiproj-production.up.railway.app](https://genaiproj-production.up.railway.app)
-- **Health Check Endpoint:** [https://genaiproj-production.up.railway.app/api/health](https://genaiproj-production.up.railway.app/api/health)
+## What it does
 
----
+1. You describe a task and provide test cases (the app can also generate test cases for you).
+2. Axiom streams a first candidate solution, generates a second one, and picks the better candidate using CodeBERT semantic similarity (with a token-frequency fallback).
+3. It runs the tests against the picked candidate in a separate Python process (stripped environment, 8-second timeout).
+4. If any test fails, it sends the error output back to the model for one repair attempt, then re-runs the tests.
+5. Before returning the result, it scans the final code with Bandit for unsafe calls (`eval`, `exec`, `subprocess`, etc.).
 
-## 📑 Syllabus Unit Coverage (U1–U5 Mapping)
+Note: the repair loop trusts your expected values. If a test's expected value is wrong, the repair will bend the code to pass the wrong test - so the tests themselves must be correct.
 
-| Unit | Syllabus Area | Implementation in P23 |
-|---|---|---|
-| **U1** | Foundations of Generative AI | Structured prompt engineering pattern containing **Specification**, **Constraints**, and **Few-Shot Test Examples** (`backend/core/pipeline.py`). |
-| **U2** | GANs & LLMs | Dual candidate generation via Groq streaming; automated **single retry with test error feedback** on failure (`pass-after-retry`). |
-| **U3** | GPT, BERT & Multimodal | GPT-family generator paired with **Microsoft CodeBERT** semantic cosine similarity ranker (`backend/core/ranker.py`). |
-| **U4** | Tools & Generation | Isolated sandbox execution runtime (`backend/core/sandbox.py`) supporting general algorithms and **GAN/VAE loss writing tasks** (Minimax GAN loss, VAE ELBO loss). |
-| **U5** | Responsible AI | Static security scan with **Bandit**, clean-room **MIT licence** verification, zero credential leakage, and full **Model Card** (`MODEL_CARD.md`). |
+## Tech stack
 
----
+- **Frontend:** React 18, Vite, Tailwind CSS, Monaco Editor
+- **Backend:** FastAPI (Python), Server-Sent Events for streaming
+- **Model:** `openai/gpt-oss-120b` served through the Groq API
+- **Ranking:** Microsoft CodeBERT embeddings (Hugging Face inference API, with a local token-frequency fallback)
+- **Test execution:** separate Python subprocess (`python -I`) with stripped environment variables and an 8-second timeout
+- **Security:** Bandit static analysis
 
-## 📊 Benchmark Evaluation (15 Canonical Tasks)
+## Run it locally
 
-Run the included benchmark suite:
-```bash
-python backend/benchmark.py
-```
+### Backend
 
-### Empirical Results Summary:
-
-| Metric | Score | Note |
-|---|---|---|
-| **Pass@1** | **73.3%** (11/15) | Candidate passed all tests on first try |
-| **Pass-after-retry** | **86.7%** (13/15) | Passed after 1-step automated repair loop |
-| **Accuracy Gain from Repair** | **+13.4%** | Measured performance improvement |
-| **Bandit Security Violations** | **0** (100% clean) | Clean AST security audits |
-| **Average Latency** | **1.85s** | End-to-end execution time per task |
-
-### Detailed 15-Task Matrix:
-
-| Task ID | Task Description | Category | Pass@1 | Pass-after-retry |
-|---|---|---|---|---|
-| 1 | Prime Number Check | Numeric | PASSED | PASSED |
-| 2 | Palindrome String | String | PASSED | PASSED |
-| 3 | Two Sum Problem | Data Structures | PASSED | PASSED |
-| 4 | Fibonacci Calculation | Algorithm | PASSED | PASSED |
-| 5 | Factorial Validation | Math / Exception | PASSED | PASSED |
-| 6 | Reverse Words in Sentence | String | PASSED | PASSED |
-| 7 | Valid Anagram | Hash Map | PASSED | PASSED |
-| 8 | Binary Search | Algorithm | FAILED | PASSED (Repaired) |
-| 9 | Merge Sorted Lists | Two-pointer | PASSED | PASSED |
-| 10 | Matrix Transposition | 2D Arrays | PASSED | PASSED |
-| 11 | **VAE ELBO Loss (U4)** | Deep Learning / VAE | FAILED | PASSED (Repaired) |
-| 12 | **GAN Discriminator Loss (U4)** | Deep Learning / GAN | PASSED | PASSED |
-| 13 | Softmax Probabilities | Math / Vectors | PASSED | PASSED |
-| 14 | Cosine Similarity | Linear Algebra | PASSED | PASSED |
-| 15 | Balanced Brackets | Stack | PASSED | PASSED |
-
----
-
-## 🛠️ Local Development Setup
-
-### 1. Backend Setup
 ```bash
 cd backend
 python -m venv venv
-source venv/bin/activate  # On Windows: venv\Scripts\activate
+source venv/bin/activate   # Windows: venv\Scripts\activate
 pip install -r requirements.txt
 ```
 
 Create `backend/.env`:
-```env
+
+```
 GROQ_API_KEY=your_groq_api_key_here
 ```
 
-Start the FastAPI server:
+Start the server:
+
 ```bash
 uvicorn main:app --reload --port 8000
 ```
 
-### 2. Frontend Setup
+### Frontend
+
 ```bash
 cd frontend
 npm install
 npm run dev
 ```
 
-Visit `http://localhost:5173` in your browser.
+The app runs on http://localhost:5173 and calls the backend at `http://127.0.0.1:8000` by default. To point it at another backend, set `VITE_API_URL` in a frontend `.env` file.
 
----
+## API endpoints
 
-## 🛡️ Security & Sandbox Architecture
-- **Environment Stripping:** Sandbox subprocess runs with an empty environment, preventing code from reading server credentials (such as `GROQ_API_KEY`).
-- **Watchdog Timeout:** Hard 8-second execution timeout prevents denial-of-service via infinite loops.
-- **Isolated Execution:** Runs with Python's isolated flag (`python -I`) ignoring external environment variables and user site-packages.
-- **Bandit Static Analysis:** Scans AST for dangerous function calls (`eval`, `exec`, `subprocess`, `shell`).
+- `GET /api/health` - health check
+- `POST /api/generate/tests` - body `{task, function_name, model?}`; returns 5 generated test cases as JSON
+- `POST /api/generate/stream` - body `{task, function_name, tests, model?}`; streams pipeline events over SSE (tokens, ranking, test results, repair, done)
 
----
+## Benchmark
 
-## 📄 Licence & Attribution
-Licensed under the [MIT Licence](LICENSE). Developed as part of the Generative AI Coursework Assessment (Mini-Project P23).
+`backend/benchmark.py` runs 15 tasks (algorithms, strings, math, plus GAN discriminator loss and VAE ELBO loss) and reports Pass@1 and pass-after-retry:
+
+```bash
+cd backend
+python benchmark.py
+```
+
+Recorded results from the project run: Pass@1 73.3% (11/15), pass-after-retry 86.7% (13/15). Numbers vary per run - rerun the script to reproduce.
+
+## Project structure
+
+```
+backend/
+  main.py            FastAPI app and SSE endpoints
+  core/pipeline.py   generate -> rank -> test -> repair loop
+  core/llm.py        Groq client (stream + complete)
+  core/ranker.py     CodeBERT candidate ranking
+  core/sandbox.py    test execution in a separate process
+  core/security.py   Bandit scan
+  benchmark.py       15-task evaluation runner
+frontend/
+  src/App.jsx        main UI (editor, pipeline stages, results)
+```
+
+## Limitations
+
+- One repair attempt max; if the repaired code still fails, the failure is returned as-is.
+- The repair loop optimizes for the given tests. Wrong expected values produce wrong "passing" code.
+- Bandit output is shown in the UI as a helper; it is not a proof that the code is safe.
+- The test runner is not a hardened sandbox: it strips environment variables and kills runs after 8 seconds, but it does not restrict filesystem or network access. Don't run untrusted code through it on a machine with sensitive data.
+- See `MODEL_CARD.md` for the full model card and responsible-AI notes.
