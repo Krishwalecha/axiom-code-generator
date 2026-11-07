@@ -9,7 +9,20 @@ from core.pipeline import stream_solve
 from core.llm import complete
 load_dotenv()
 app=FastAPI(title="Axiom Code Generator API")
-app.add_middleware(CORSMiddleware,allow_origins=["*"],allow_methods=["*"],allow_headers=["*"])
+origins = [
+    "https://axiom-code-generator.vercel.app",
+    "http://localhost:5173",
+    "http://localhost:3000",
+]
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_origin_regex=r"^https:\/\/.*\.vercel\.app$",
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 class Request(BaseModel):
     task:str=Field(min_length=8,max_length=8000)
