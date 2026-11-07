@@ -14,9 +14,9 @@ def stream_solve(task,fn,tests,model):
  for t in stream(msgs,model):
   tokens.append(t);yield {"type":"token","token":t}
  first=clean("".join(tokens))
- yield {"type":"status","stage":"ranking","message":"Generating candidate 2 and ranking with CodeBERT"}
+ yield {"type":"status","stage":"ranking","message":"Generating candidate 2 and ranking"}
  second=clean(complete(msgs,model));ranked,note=rank(task,[first,second]);code=ranked[0]
- if code!=first:yield {"type":"code","code":code,"message":"CodeBERT selected candidate 2"}
+ if code!=first:yield {"type":"code","code":code,"message":"Candidate 2 selected"}
  yield {"type":"status","stage":"testing","message":"Executing tests in isolated sandbox"}
  ok,out=run(code,fn,tests);attempts=1
  yield {"type":"test_result","passed":ok,"output":out,"attempts":attempts}
